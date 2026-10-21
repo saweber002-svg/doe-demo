@@ -361,6 +361,15 @@
       .calc-inputs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
       @media (max-width: 860px) { .calc-inputs { grid-template-columns: repeat(3, 1fr); } }
       @media (max-width: 520px) { .calc-inputs { grid-template-columns: 1fr 1fr; } }
+
+      /* ---------- exo suit (§14) ---------- */
+      .suit-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .suit-inputs { grid-template-columns: repeat(3, 1fr); margin-top: 14px; }
+      @media (max-width: 520px) { .suit-inputs { grid-template-columns: 1fr; } }
+      .suit-inputs input:disabled { opacity: .45; }
+      .suit-readout { margin-top: 14px; font-size: .93rem; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: 10px 12px; }
+      .suit-readout strong { color: var(--ink); }
+      .step.suit { border-color: var(--gold); }
       .field label { display: block; font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 5px; }
       .field label .p1tag { color: var(--p1); }
       .field label .perktag { color: var(--perk); }
@@ -788,17 +797,48 @@
       <!-- 13 · Weapon Builder -->
       <section aria-labelledby="s-builder">
         <div class="sec-head"><span class="sec-num">13</span><h2 id="s-builder">Weapon Builder</h2></div>
-        <p class="sec-sub">Assemble a looted weapon the way it drops — class, module tier, rarity, element and rolled perks — and see what it pays per hit. The two builds feed the A/B compare strip in the dummy window (§03) above. Damage estimates follow the one published scaling rule — a dropped module deals roughly <strong>1×–2× your player level</strong>, class-dependent — so every estimate is labelled approximate, and a real weapon's number can be typed in as an override.</p>
+        <p class="sec-sub">Assemble a looted weapon the way it drops — class, module tier, rarity, element and rolled perks — and see what it pays per hit. The two builds feed the A/B compare strip in the dummy window (§03) above. Damage estimates follow the one published scaling rule — a dropped module deals roughly <strong>1×–2× your player level</strong>, class-dependent — so every estimate is labelled approximate, and a real weapon's number can be typed in as an override. Both builds also wear the exo suit (§14) whenever it is equipped — its flat damage, damage multiplier and perk amplification are inside every expected value below.</p>
         <div class="wb-grid">
           <div class="card wb-panel" id="wbPanelA"></div>
           <div class="card wb-panel" id="wbPanelB"></div>
         </div>
       </section>
 
+      <!-- 14 · Exo Suit -->
+      <section aria-labelledby="s-suit">
+        <div class="sec-head"><span class="sec-num">14</span><h2 id="s-suit">Exo Suit</h2></div>
+        <p class="sec-sub">The wearer's suit layer, built like the weapon builder: set its stat modifiers and every surface downstream feels them — the §04 calculator and its step-by-step breakdown, the tier table, matrix and simulator, the §13 builder's expected values and the A/B compare, and the numbers floated off the §03 dummy. Toggle the suit off to compare the same setup with and without it.</p>
+        <div class="card">
+          <div class="suit-head">
+            <h3>Suit stats — wearer modifiers</h3>
+            <button type="button" class="proc-btn" id="suitToggle" aria-pressed="true">Suit equipped</button>
+          </div>
+          <p class="wb-note"><strong>Placeholder values — not game data.</strong> No exo-suit system appears anywhere in the game's public data (§12), so nothing here is a researched stat: every number below is an editable input with a placeholder default, waiting for the dev team to supply the real suit values (see §10). Treat them exactly like the §04 example perk bonuses.</p>
+          <div class="calc-inputs suit-inputs">
+            <div class="field">
+              <label for="suitDmg">Damage dealt</label>
+              <div class="inwrap"><input id="suitDmg" type="number" inputmode="decimal" min="0" step="1" value="10" /><span class="unit">%</span></div>
+              <div class="hint">Multiplies all damage dealt</div>
+            </div>
+            <div class="field">
+              <label for="suitFlat">Power core — flat damage</label>
+              <div class="inwrap"><input id="suitFlat" type="number" inputmode="decimal" min="0" step="1" value="5" /><span class="unit">dmg</span></div>
+              <div class="hint">Added to the weapon's base damage</div>
+            </div>
+            <div class="field">
+              <label for="suitAmp">Perk amplification</label>
+              <div class="inwrap"><input id="suitAmp" type="number" inputmode="decimal" min="0" step="1" value="20" /><span class="unit">%</span></div>
+              <div class="hint">Scales every perk bonus and perk factor</div>
+            </div>
+          </div>
+          <p class="suit-readout" id="suitReadout" aria-live="polite"></p>
+        </div>
+      </section>
+
       <!-- 4 · Calculator -->
       <section aria-labelledby="s-calc">
         <div class="sec-head"><span class="sec-num">04</span><h2 id="s-calc">Calculator</h2></div>
-        <p class="sec-sub">Set your weapon's base damage and what each perk adds when it procs. Everything on this page — tiers, matrix, legend, simulator — recalculates from these five numbers.</p>
+        <p class="sec-sub">Set your weapon's base damage and what each perk adds when it procs. Everything on this page — tiers, matrix, legend, simulator — recalculates from these five numbers, plus the exo suit layer (§14) when it is equipped.</p>
 
         <div class="card">
           <div class="calc-inputs">
@@ -1066,6 +1106,7 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
             <li><strong>Rounding of displayed damage</strong> — does the game floor, round, or truncate the floating damage points? <em>Blocks:</em> exact "read the number" decoding in §06 — a rounded display can sit 1 point off the model's exact output.</li>
             <li><strong>What the floating display actually shows</strong> — with the damage display toggled on, does the rising text show the final damage only, the multiplier separately, or both combined? <em>Blocks:</em> how literally the pip + badge reading system maps onto the in-game presentation.</li>
             <li><strong>Independence &amp; re-roll timing</strong> — confirm each perk rolls independently per hit in the current version (this model's core assumption), and whether any weapon or effect re-rolls, guarantees, or suppresses a proc.</li>
+            <li><strong>Exo suit stats</strong> — no exo-suit system exists in the game's public data, so §14 ships as placeholder inputs (damage dealt %, flat damage, perk amplification). <em>Blocks:</em> replacing the placeholders with the real suit's stats — or removing the layer if the shipped game has none.</li>
           </ul>
         </div>
       </section>
@@ -1739,6 +1780,18 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         shot: [true, false, true, false]   // shot-builder pattern (Perk 1 + Perk 3)
       };
 
+      // ---------- exo suit (§14) ----------
+      // No exo-suit system exists in the game's public data, so these are
+      // user-editable PLACEHOLDER inputs — like the §04 example bonuses,
+      // never researched stats. The suit layer flows into every surface:
+      // the calculator breakdown, tier table, matrix, legend and simulator
+      // (via patternDamage / expectedDamage), the §13 weapon builder and
+      // A/B compare (via wbCompute), and the §03 dummy strikes.
+      var suit = { on: true, dmgPct: 10, flat: 5, perkAmp: 20 };
+      function suitMult() { return suit.on ? 1 + suit.dmgPct / 100 : 1; }  // damage-dealt multiplier
+      function suitFlat() { return suit.on ? suit.flat : 0; }               // flat damage added to base
+      function suitAmpF() { return suit.on ? 1 + suit.perkAmp / 100 : 1; } // scales perk bonuses
+
       // ---------- enumerate the 16 patterns ----------
       var patterns = [];
       for (var mask = 0; mask < 16; mask++) {
@@ -1771,10 +1824,10 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
       function patternBonusSum(p) {
         var sum = 0;
         for (var i = 0; i < 4; i++) if (p.bits[i]) sum += state.bonuses[i];
-        return sum;
+        return sum * suitAmpF();
       }
       function patternDamage(p, zoneKey) {
-        return state.base * ZONES[zoneKey].mult * (1 + patternBonusSum(p));
+        return (state.base + suitFlat()) * ZONES[zoneKey].mult * (1 + patternBonusSum(p)) * suitMult();
       }
       // per-tier stats for a zone: weighted-average damage, min, max
       function tierStats(zoneKey) {
@@ -1795,7 +1848,8 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
       function expectedDamage(zoneKey) {
         var lift = 0;
         for (var i = 0; i < 4; i++) lift += PROC[i] * state.bonuses[i];
-        return { dmg: state.base * ZONES[zoneKey].mult * (1 + lift), lift: lift };
+        lift *= suitAmpF();
+        return { dmg: (state.base + suitFlat()) * ZONES[zoneKey].mult * (1 + lift) * suitMult(), lift: lift };
       }
 
       // ---------- static: tier probability bars ----------
@@ -2012,10 +2066,11 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         var bits = PROC.map(function (p) { return Math.random() < p ? 1 : 0; });
         var bonus = 0, names = [];
         bits.forEach(function (b, i) { if (b) { bonus += state.bonuses[i]; names.push('P' + (i + 1)); } });
-        var dmg = state.base * zrec.multiplier * (1 + bonus);
+        var dmg = (state.base + suitFlat()) * zrec.multiplier * (1 + bonus * suitAmpF()) * suitMult();
         floatHit(zrec.zone, fmtDmg(dmg), pipsHTML(bits, 'sm'));
         if (out) out.innerHTML = '<strong>' + fmtDmg(dmg) + '</strong> — ' + enName + ', ' + zrec.label + ' ×' + zrec.multiplier + ' · ' +
-          (names.length ? names.join(' + ') + ' procced' : 'no perks procced') + ' · swung with the §04 calculator’s weapon (base ' + fmtDmg(state.base) + ').';
+          (names.length ? names.join(' + ') + ' procced' : 'no perks procced') + ' · swung with the §04 calculator’s weapon (base ' + fmtDmg(state.base) + ')' +
+          (suit.on ? ' · exo suit (§14) on: damage ×' + suitMult().toFixed(2) + (suit.flat > 0 ? ', +' + fmtDmg(suit.flat) + ' flat' : '') + (suit.perkAmp > 0 && bonus > 0 ? ', perks amplified ×' + suitAmpF().toFixed(2) : '') : '') + '.';
       }
       function selectEnemy(id) {
         state.enemy = id;
@@ -2079,6 +2134,7 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
       // ---------- shot builder toggles ----------
       document.querySelectorAll('.proc-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
+          if (btn.getAttribute('data-perk') === null) return; // styling-only .proc-btn (the §14 suit toggle) — not a perk toggle
           var i = +btn.getAttribute('data-perk');
           state.shot[i] = !state.shot[i];
           btn.setAttribute('aria-pressed', state.shot[i] ? 'true' : 'false');
@@ -2087,24 +2143,57 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         });
       });
 
+      // ---------- exo suit panel (§14) ----------
+      function syncSuit() {
+        var t = $('suitToggle');
+        if (t) {
+          t.setAttribute('aria-pressed', suit.on ? 'true' : 'false');
+          t.textContent = suit.on ? 'Suit equipped' : 'Suit off — tap to equip';
+        }
+        ['suitDmg', 'suitFlat', 'suitAmp'].forEach(function (id) { var el = $(id); if (el) el.disabled = !suit.on; });
+        var ro = $('suitReadout');
+        if (ro) ro.innerHTML = suit.on
+          ? 'In the math right now: <strong>×' + suitMult().toFixed(2) + '</strong> damage dealt · <strong>+' + fmtDmg(suit.flat) + '</strong> flat damage on the weapon base · perk bonuses amplified <strong>×' + suitAmpF().toFixed(2) + '</strong>. Flowing into the §03 dummy strikes, the §04 calculator, tier table, matrix and simulator, and the §13 builder + A/B compare.'
+          : 'Suit is <strong>off</strong> — the calculator, builder and dummy all run without it, exactly as before. Equip it to compare the same setup with the suit on.';
+        renderCalc();
+        if (typeof wbRefreshAll === 'function') wbRefreshAll();
+      }
+      function readSuitInputs() {
+        var d = parseFloat($('suitDmg').value); suit.dmgPct = isFinite(d) && d >= 0 ? d : 0;
+        var f = parseFloat($('suitFlat').value); suit.flat = isFinite(f) && f >= 0 ? f : 0;
+        var a = parseFloat($('suitAmp').value); suit.perkAmp = isFinite(a) && a >= 0 ? a : 0;
+        syncSuit();
+      }
+      if ($('suitToggle')) {
+        $('suitToggle').addEventListener('click', function () { suit.on = !suit.on; syncSuit(); });
+        ['suitDmg', 'suitFlat', 'suitAmp'].forEach(function (id) { $(id).addEventListener('input', readSuitInputs); });
+      }
+
       // ---------- renders driven by calculator state ----------
       function renderCalc() { renderBreakdown(); renderTierTable(); renderMatrix(); renderLegend(); renderSim(); }
 
       function renderBreakdown() {
         var z = ZONES[state.zone];
-        var bonusSum = 0, names = [];
-        for (var i = 0; i < 4; i++) if (state.shot[i]) { bonusSum += state.bonuses[i]; names.push('P' + (i + 1)); }
-        var afterZone = state.base * z.mult;
-        var final = afterZone * (1 + bonusSum);
+        var rawBonus = 0, names = [];
+        for (var i = 0; i < 4; i++) if (state.shot[i]) { rawBonus += state.bonuses[i]; names.push('P' + (i + 1)); }
+        var bonusSum = rawBonus * suitAmpF();
+        var effBase = state.base + suitFlat();
+        var afterZone = effBase * z.mult;
+        var final = afterZone * (1 + bonusSum) * suitMult();
         var tier = state.shot.reduce(function (a, b) { return a + (b ? 1 : 0); }, 0);
-        $('breakdown').innerHTML =
-          '<div class="step"><div class="st-label">Base</div><div class="st-val">' + fmtDmg(state.base) + '</div><div class="st-sub">weapon damage</div></div>' +
+        var html =
+          '<div class="step"><div class="st-label">Base</div><div class="st-val">' + fmtDmg(effBase) + '</div><div class="st-sub">' + (suit.on && suit.flat > 0 ? fmtDmg(state.base) + ' weapon + ' + fmtDmg(suit.flat) + ' suit core' : 'weapon damage') + '</div></div>' +
           '<div class="step-arrow">×</div>' +
           '<div class="step"><div class="st-label">Hitbox · ' + z.name + '</div><div class="st-val">×' + z.mult + '</div><div class="st-sub">= ' + fmtDmg(afterZone) + '</div></div>' +
           '<div class="step-arrow">×</div>' +
-          '<div class="step"><div class="st-label">Perk bonus</div><div class="st-val">' + (bonusSum > 0 ? '+' + Math.round(bonusSum * 100) + '%' : '0%') + '</div><div class="st-sub">' + (names.length ? names.join(' + ') + ' procced' : 'nothing procced') + '</div></div>' +
-          '<div class="step-arrow">=</div>' +
+          '<div class="step"><div class="st-label">Perk bonus</div><div class="st-val">' + (bonusSum > 0 ? '+' + Math.round(bonusSum * 100) + '%' : '0%') + '</div><div class="st-sub">' + (names.length ? names.join(' + ') + ' procced' : 'nothing procced') + (suit.on && suit.perkAmp > 0 && rawBonus > 0 ? ' · suit-amplified ×' + suitAmpF().toFixed(2) : '') + '</div></div>';
+        if (suit.on) {
+          html += '<div class="step-arrow">×</div>' +
+            '<div class="step suit"><div class="st-label">Exo suit · §14</div><div class="st-val">×' + suitMult().toFixed(2) + '</div><div class="st-sub">damage dealt +' + fmtDmg(suit.dmgPct) + '%' + (suit.flat > 0 ? ' · +' + fmtDmg(suit.flat) + ' flat in base' : '') + (suit.perkAmp > 0 ? ' · perks ×' + suitAmpF().toFixed(2) : '') + ' · placeholder</div></div>';
+        }
+        html += '<div class="step-arrow">=</div>' +
           '<div class="step final"><div class="st-label">Final damage</div><div class="st-val">' + fmtDmg(final) + '</div><div class="st-sub">' + pipsHTML(state.shot, 'sm') + ' tier ' + tier + ' · ' + fmtPct(tierProb[tier]) + ' of hits</div></div>';
+        $('breakdown').innerHTML = html;
       }
 
       function renderTierTable() {
@@ -2125,6 +2214,9 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         $('avgNote').innerHTML = 'Long-run average on <b>' + ZONES[state.zone].name + ' ×' + ZONES[state.zone].mult + '</b>. ' +
           'Your perks add <b>+' + (Math.round(exp.lift * 1000) / 10) + '%</b> on average before the hitbox ' +
           '(40% × Perk 1, 32% × each of Perks 2–4), and the average hit procs <b>1.36 perks</b>.';
+        if (suit.on) {
+          $('avgNote').innerHTML += ' The exo suit (§14) is <b>equipped</b>: +' + fmtDmg(suit.flat) + ' flat on the base, perk lift amplified ×' + suitAmpF().toFixed(2) + ', and the result multiplied ×' + suitMult().toFixed(2) + ' — placeholder values.';
+        }
       }
 
       function renderMatrix() {
@@ -2224,6 +2316,7 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
       // ---------- init ----------
       readInputs();   // syncs bonus labels + renders calc-driven sections
       renderEnemy();  // builds the §03 dummy stage + zone buttons from ENEMIES
+      syncSuit();     // fills the §14 readout (the §13 script re-renders itself on load)
       setZone('chest');
       renderSim();
     </script>
@@ -2761,22 +2854,32 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         else if (b.cls.scale === 2) est = { type: 'point', value: 2 * b.level, rule: '≈2× level — Two-Handed Swords sit at the top of the published band' };
         else est = { type: 'range', lo: b.level, hi: 2 * b.level, rule: 'level – 2× level — the published band for this class' };
         var estBase = est.type === 'point' ? est.value : (est.lo + est.hi) / 2;
-        var base = b.override != null ? b.override : estBase;
+        // Exo suit (§14): flat damage folds into the base; the damage-dealt
+        // multiplier and perk amplification come from the shared suit state
+        // (placeholder inputs — see the §14 panel). Amplification scales
+        // each counted perk's gain (f − 1), never a penalty like Reload's.
+        var sOn = (typeof suit !== 'undefined') && suit.on;
+        var sFlat = sOn ? suit.flat : 0;
+        var sMult = sOn ? 1 + suit.dmgPct / 100 : 1;
+        var sAmp = sOn ? 1 + suit.perkAmp / 100 : 1;
+        var base = (b.override != null ? b.override : estBase) + sFlat;
         var baseLabel = b.override != null ? 'your override' : (est.type === 'point' ? 'point estimate' : 'estimate midpoint');
-        var factor = 1, counted = [], inactive = [], utility = [], excluded = [];
+        var factor = 1, counted = [], inactive = [], utility = [], excluded = [], ampUsed = false;
         b.perks.forEach(function (p) {
           var def = WB_PERKS[p.id];
           if (def.kind === 'utility') { utility.push(def.name); return; }
           if (def.kind === 'excluded') { excluded.push(def.name + ' — damage over time, not a per-hit number'); return; }
           if (def.context && def.context !== b.context) { inactive.push(def.name + ' (counts on ' + def.context + 's only)'); return; }
-          var f;
-          if (def.kind === 'percent') { f = 1 + p.value / 100; counted.push(def.name + ' +' + p.value + '% → ×' + f.toFixed(3)); }
-          else if (def.kind === 'fixed') { f = 1 + def.value / 100; counted.push(def.name + ' +' + def.value + '% → ×' + f.toFixed(3)); }
-          else if (def.kind === 'proc') { f = 1 + (p.value / 100) * (def.multiple - 1); counted.push(def.name + ': ' + p.value + '% chance at ' + def.multiple + '00% → ×' + f.toFixed(3)); }
-          else if (def.kind === 'reload') { f = 1 - 0.075 * p.value; counted.push('Reload +' + p.value + ' shots → ×' + f.toFixed(3) + ' — flagged assumption: −7.5% damage per extra shot, from the official Crossbow Reload note'); }
+          var f, label;
+          if (def.kind === 'percent') { f = 1 + p.value / 100; label = def.name + ' +' + p.value + '%'; }
+          else if (def.kind === 'fixed') { f = 1 + def.value / 100; label = def.name + ' +' + def.value + '%'; }
+          else if (def.kind === 'proc') { f = 1 + (p.value / 100) * (def.multiple - 1); label = def.name + ': ' + p.value + '% chance at ' + def.multiple + '00%'; }
+          else if (def.kind === 'reload') { f = 1 - 0.075 * p.value; label = 'Reload +' + p.value + ' shots'; }
+          if (f > 1 && sAmp > 1) { f = 1 + (f - 1) * sAmp; ampUsed = true; }
+          counted.push(label + ' → ×' + f.toFixed(3) + (def.kind === 'reload' ? ' — flagged assumption: −7.5% damage per extra shot, from the official Crossbow Reload note' : ''));
           factor *= f;
         });
-        return { est: est, base: base, baseLabel: baseLabel, factor: factor, counted: counted, inactive: inactive, utility: utility, excluded: excluded };
+        return { est: est, base: base, baseLabel: baseLabel, factor: factor, counted: counted, inactive: inactive, utility: utility, excluded: excluded, suitOn: sOn, suitFlat: sFlat, suitMult: sMult, suitAmp: sAmp, ampUsed: ampUsed };
       }
       function wbRenderSummary(key) {
         var panel = wbPanel(key);
@@ -2784,7 +2887,7 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         var c = wbCompute(b);
         wbRenderArt(key);
         var estTxt = c.est.type === 'point' ? '≈ ' + wbFmt(c.est.value) : '≈ ' + wbFmt(c.est.lo) + '–' + wbFmt(c.est.hi);
-        var expHit = Math.round(c.base * c.factor * 10) / 10;
+        var expHit = Math.round(c.base * c.factor * c.suitMult * 10) / 10;
         var vsTxt = '';
         var en = (typeof currentEnemy === 'function') ? currentEnemy() : null;
         if (en) {
@@ -2792,7 +2895,7 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
           var known = en.hitboxZones.filter(function (z) { return z.multiplier != null; });
           vsTxt = known.length
             ? '<div class="wb-line wb-vs">Expected per hit vs the ' + enName + ' (§03 target): ' +
-              known.map(function (z) { return z.label + ' <strong>' + wbFmt(Math.round(c.base * z.multiplier * c.factor * 10) / 10) + '</strong>'; }).join(' · ') + '</div>'
+              known.map(function (z) { return z.label + ' <strong>' + wbFmt(Math.round(c.base * z.multiplier * c.factor * c.suitMult * 10) / 10) + '</strong>'; }).join(' · ') + '</div>'
             : '<div class="wb-line wb-vs">The §03 target (' + enName + ') has no known zone multipliers yet — set the target to the Megamage to see this build’s per-zone values.</div>';
         }
         var html = '<div class="wb-stats">' +
@@ -2804,6 +2907,8 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
           '<div class="wb-line">' + c.est.rule + ', at player level ' + b.level + ' — <strong>approximate</strong>.</div>' +
           '<div class="wb-line">Base used in the §03 compare: <strong>' + wbFmt(c.base) + '</strong> (' + c.baseLabel + ').</div>' +
           '<div class="wb-line">Perk factor: <strong>×' + c.factor.toFixed(3) + '</strong> expected per hit, ' + b.context + ' context.</div>';
+        if (c.suitOn) html += '<div class="wb-line">Exo suit (§14): <strong>×' + c.suitMult.toFixed(3) + '</strong> damage dealt' + (c.suitFlat > 0 ? ' · <strong>+' + wbFmt(c.suitFlat) + '</strong> flat folded into the base above' : '') + (c.ampUsed ? ' · perk factors above include its ×' + c.suitAmp.toFixed(2) + ' amplification' : '') + ' — placeholder values.</div>';
+        else html += '<div class="wb-line">Exo suit (§14): <strong>off</strong> — no suit factor in these numbers.</div>';
         if (c.counted.length) html += '<ul>' + c.counted.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>';
         if (c.inactive.length) html += '<div class="wb-line">Picked but not in this context: ' + c.inactive.join('; ') + '.</div>';
         if (c.utility.length) html += '<div class="wb-line">Utility — listed, never counted in damage: ' + c.utility.join(', ') + '.</div>';
@@ -2823,6 +2928,9 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
         note.innerHTML = 'Expected damage per hit = base × zone multiplier × perk factor, rounded. ' +
           'Build A base: <strong>' + wbFmt(a.base) + '</strong> (' + a.baseLabel + ') · Build B base: <strong>' + wbFmt(b.base) + '</strong> (' + b.baseLabel + '). ' +
           'Builds are set in the Weapon Builder (§13) below.';
+        if (a.suitOn) {
+          note.innerHTML += ' Both builds wear the exo suit (§14): +' + wbFmt(a.suitFlat) + ' flat inside each base, damage ×' + a.suitMult.toFixed(2) + ', perk bonuses amplified ×' + a.suitAmp.toFixed(2) + ' — placeholder values.';
+        }
         var knownZones = en.hitboxZones.filter(function (z) { return z.multiplier != null; });
         if (!knownZones.length) {
           table.innerHTML = '<tbody><tr><td>Hitbox multipliers for the ' + enName + ' are <strong>not yet known</strong> — every zone is an open question for the dev team (see the zone buttons above), so there is no honest comparison to show for this enemy yet. The builds themselves are unchanged.</td></tr></tbody>';
@@ -2841,8 +2949,8 @@ rollPerks(rng)            // simulator: rng() &lt; procChance[i] per perk</pre>
               '<td><span class="win-mark">Unknown — dev team question</span></td></tr>';
             return;
           }
-          var da = Math.round(a.base * z.multiplier * a.factor);
-          var db = Math.round(b.base * z.multiplier * b.factor);
+          var da = Math.round(a.base * z.multiplier * a.factor * a.suitMult);
+          var db = Math.round(b.base * z.multiplier * b.factor * b.suitMult);
           var mark, cls;
           if (da > db) { mark = 'A wins'; cls = 'a'; winsA++; }
           else if (db > da) { mark = 'B wins'; cls = 'b'; winsB++; }
